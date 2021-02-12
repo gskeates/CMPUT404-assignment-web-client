@@ -43,10 +43,10 @@ class HTTPClient(object):
 
     def get_code(self, data):
         # Grab first line
-        line_pattern = re.compile('HTTP/1.[01] [\S ]*[^\r\n]')
+        line_pattern = re.compile('HTTP/1.[01] [\S ]*')
         line = line_pattern.match(data).group()
 
-        # Grab code
+        # Grab code from line
         code_pattern = re.compile('\d{3,3}')
         code = code_pattern.search(line).group()
 
