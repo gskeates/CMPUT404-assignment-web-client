@@ -42,15 +42,19 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        code_pattern = re.compile('HTTP/1.[01] \d{3,3} [\w ]*[^\r\n]')
-        line = code_pattern.match(data).group()
-        parts = line.split()
-        code = int(parts[1])
-        message = " ".join(parts[2:])
-        return code
+        # Grab first line
+        line_pattern = re.compile('HTTP/1.[01] [\S ]*[^\r\n]')
+        line = line_pattern.match(data).group()
+
+        # Grab code
+        code_pattern = re.compile('\d{3,3}')
+        code = code_pattern.search(line).group()
+
+        return int(code)
 
     def get_headers(self, data):
-        return None
+        header, body = data.split('\r\n\r\n')
+        return header
 
     def get_body(self, data):
         header, body = data.split('\r\n\r\n')
@@ -87,6 +91,7 @@ class HTTPClient(object):
             port = parsed_URL.port
         host = parsed_URL.hostname
 
+        # Create path
         path = parsed_URL.path
         if len(path) == 0:
             path = '/'
@@ -110,11 +115,16 @@ class HTTPClient(object):
         code = self.get_code(response)
         body = self.get_body(response)
 
+        # Display server response
+        # print(code)
+        # print("Body = ", body)
+
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
         code = 500
         body = ""
+
         # Parse URL for information
         parsed_URL = urllib.parse.urlparse(url)
         if parsed_URL.port is None:
@@ -123,6 +133,7 @@ class HTTPClient(object):
             port = parsed_URL.port
         host = parsed_URL.hostname
 
+        # Create path
         path = parsed_URL.path
         if len(path) == 0:
             path = '/'
@@ -133,7 +144,7 @@ class HTTPClient(object):
         else:
             query_string = urllib.parse.urlencode(args)
             request = "POST {} HTTP/1.1\r\nHost: {}\r\nContent-Type: application/x-www-form-urlencoded\r\nAccept: */*\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}".format(path, host, len(query_string), query_string)
-        print(request)
+
         # Set up connection
         self.connect(host, port)
 
@@ -142,12 +153,18 @@ class HTTPClient(object):
 
         # Receive response
         response = self.recvall(self.socket)
+
         # Close connection
         self.close()
 
         # Parse response for body and status code
         code = self.get_code(response)
         body = self.get_body(response)
+
+        # Display server response
+        print(code)
+        print(body)
+
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):
