@@ -111,13 +111,16 @@ class HTTPClient(object):
         # Close connection
         self.close()
 
-        # Parse response for body and status code
+        # Parse response for body, headers and status code
         code = self.get_code(response)
+        headers = self.get_headers(response)
         body = self.get_body(response)
 
         # Display server response
-        # print(code)
-        # print("Body = ", body)
+        print("Status code:", code)
+        print(headers)
+        print()
+        print(body)
 
         return HTTPResponse(code, body)
 
@@ -157,12 +160,15 @@ class HTTPClient(object):
         # Close connection
         self.close()
 
-        # Parse response for body and status code
+        # Parse response for body, headers and status code
         code = self.get_code(response)
+        headers = self.get_headers(response)
         body = self.get_body(response)
 
         # Display server response
-        print(code)
+        print("Status code:", code)
+        print(headers)
+        print()
         print(body)
 
         return HTTPResponse(code, body)
